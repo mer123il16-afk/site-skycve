@@ -1,0 +1,1570 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>بوت هوست — استضافة بوتات تيليجرام مجاناً</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lalezar&family=Cairo:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0f1c; --panel:#101a2e; --panel2:#0c1424; --ink:#0a121f;
+  --line:#1d2b47; --line2:#2c4066;
+  --txt:#e9f0fb; --mut:#8ba1c0; --dim:#5a6f8f;
+  --blue:#38b0ee; --green:#3fdc8f; --amber:#ffb454; --red:#ff6b7a; --cyan:#5fd7e8;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--txt);font-family:'Cairo',sans-serif;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:radial-gradient(circle,rgba(120,150,200,.09) 1px,transparent 1px);background-size:26px 26px}
+.glow{position:fixed;border-radius:50%;filter:blur(90px);z-index:0;pointer-events:none;opacity:.5}
+.g1{width:520px;height:520px;background:radial-gradient(circle,rgba(56,176,238,.16),transparent 70%);top:-180px;right:-120px;animation:drift 14s ease-in-out infinite alternate}
+.g2{width:460px;height:460px;background:radial-gradient(circle,rgba(255,180,84,.10),transparent 70%);bottom:-160px;left:-100px;animation:drift 18s ease-in-out infinite alternate-reverse}
+@keyframes drift{to{transform:translate(40px,30px)}}
+.wrap{position:relative;z-index:1;max-width:1240px;margin:0 auto;padding:0 20px}
+.mono{font-family:'IBM Plex Mono',monospace}
+.hidden{display:none!important}
+.topstrip{border-bottom:1px solid var(--line);background:rgba(10,15,28,.8);backdrop-filter:blur(6px);font-size:12px;color:var(--mut);padding:7px 0}
+.topstrip .wrap{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.topstrip .v{color:var(--blue);font-weight:700}
+.ts-left{display:flex;gap:14px;align-items:center}
+#apiChip{display:inline-flex;align-items:center;gap:6px}
+#apiChip .dot{width:7px;height:7px;border-radius:50%;background:var(--dim)}
+#apiChip.ok .dot{background:var(--green);box-shadow:0 0 8px var(--green)}
+#apiChip.bad .dot{background:var(--amber)}
+header .wrap{display:flex;justify-content:space-between;align-items:center;gap:22px;padding:26px 20px 18px;flex-wrap:wrap}
+.brand{display:flex;gap:14px;align-items:center}
+.logo{width:56px;height:56px;flex:none;border-radius:14px;display:grid;place-items:center;
+  background:linear-gradient(135deg,#12395c,#0d2036);border:1px solid var(--line2);
+  box-shadow:0 0 24px rgba(56,176,238,.25), inset 0 1px 0 rgba(255,255,255,.06)}
+.brand h1{font-family:'Lalezar',cursive;font-size:38px;line-height:1;color:#fff;letter-spacing:.5px}
+.brand h1 span{color:var(--blue)}
+.brand p{color:var(--mut);font-size:13.5px;margin-top:2px}
+.runzone{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.tokenwrap{position:relative}
+.tokenwrap input{background:var(--panel2);border:1px solid var(--line);color:var(--txt);border-radius:10px;
+  padding:11px 42px 11px 14px;width:270px;font-family:'IBM Plex Mono',monospace;font-size:12.5px;
+  direction:ltr;text-align:left;transition:.25s}
+.tokenwrap input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(56,176,238,.15)}
+.tokenwrap input::placeholder{color:var(--dim);direction:rtl;text-align:right;font-family:'Cairo'}
+.tokenwrap input.shake{animation:shake .4s}
+@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+#eye{position:absolute;left:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:15px;opacity:.7}
+#eye:hover{opacity:1}
+.btn{border:none;cursor:pointer;font-family:'Cairo';font-weight:700;font-size:14.5px;
+  border-radius:10px;padding:11px 22px;transition:.2s;display:inline-flex;align-items:center;gap:8px}
+.btn:active{transform:scale(.96)}
+.btn.run{background:var(--green);color:#04160c;box-shadow:0 4px 18px rgba(63,220,143,.3)}
+.btn.run:hover{transform:translateY(-2px);box-shadow:0 8px 26px rgba(63,220,143,.45)}
+.btn.run.stop{background:var(--red);color:#2a060b;box-shadow:0 4px 18px rgba(255,107,122,.3);animation:pulse 1.6s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 8px rgba(255,107,122,.08)}}
+.btn.ghost{background:transparent;border:1.5px solid var(--amber);color:var(--amber)}
+.btn.ghost:hover{background:rgba(255,180,84,.12);transform:translateY(-2px)}
+.btn.icon{background:var(--panel);border:1px solid var(--line);color:var(--mut);padding:11px 14px;font-size:16px}
+.btn.icon:hover{color:var(--txt);border-color:var(--line2)}
+.statusline{display:flex;align-items:center;gap:12px;padding:0 20px 16px;flex-wrap:wrap}
+.pill{display:inline-flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:6px 16px;font-size:13px;font-weight:600}
+.led{width:9px;height:9px;border-radius:50%;background:var(--dim)}
+.pill.on .led{background:var(--green);box-shadow:0 0 10px var(--green);animation:blink 1.2s infinite}
+.pill.starting .led{background:var(--amber);box-shadow:0 0 10px var(--amber);animation:blink .6s infinite}
+.pill.err .led{background:var(--red);box-shadow:0 0 10px var(--red)}
+@keyframes blink{50%{opacity:.35}}
+.chip{background:rgba(56,176,238,.12);border:1px solid rgba(56,176,238,.4);color:var(--cyan);border-radius:999px;padding:5px 14px;font-size:12.5px;font-weight:700}
+.flex1{flex:1}
+.hint{color:var(--dim);font-size:11.5px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr) 2fr;gap:12px;margin-bottom:16px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 18px;
+  transition:.25s;position:relative;overflow:hidden}
+.stat:hover{border-color:var(--line2);transform:translateY(-2px)}
+.stat::after{content:'';position:absolute;top:0;right:0;width:100%;height:2px;background:linear-gradient(90deg,transparent,var(--blue),transparent);opacity:0;transition:.3s}
+.stat:hover::after{opacity:.7}
+.s-label{font-size:11.5px;color:var(--dim);font-weight:600}
+.s-val{font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;margin-top:4px;direction:ltr;text-align:right}
+.s-val.bump{animation:bump .3s}
+@keyframes bump{40%{transform:scale(1.15);color:var(--cyan)}}
+.s-sub{font-size:11px;color:var(--mut);margin-top:2px}
+.stat.spark{display:flex;flex-direction:column}
+.stat.spark canvas{flex:1;width:100%;min-height:52px}
+.grid{display:grid;grid-template-columns:1.15fr 1fr;gap:14px;margin-bottom:16px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.panel-head{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);
+  background:var(--panel2);flex-wrap:wrap}
+.tab{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--cyan);
+  background:rgba(95,215,232,.08);border:1px solid rgba(95,215,232,.25);padding:4px 12px;border-radius:7px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-right:auto}
+.tchip{background:transparent;border:1px solid var(--line2);color:var(--mut);cursor:pointer;
+  font-family:'Cairo';font-size:11.5px;font-weight:600;padding:4px 12px;border-radius:999px;transition:.2s}
+.tchip:hover{border-color:var(--blue);color:var(--cyan);transform:translateY(-1px)}
+.tchip.active{background:rgba(56,176,238,.15);border-color:var(--blue);color:var(--cyan)}
+.tchip.warn{border-color:var(--amber);color:var(--amber)}
+.tchip.warn:hover{background:rgba(255,180,84,.12)}
+.editor-body{display:flex;flex:1;min-height:430px;direction:ltr}
+.gutter{width:46px;flex:none;background:var(--panel2);border-right:1px solid var(--line);
+  font-family:'IBM Plex Mono',monospace;font-size:13px;line-height:1.75;color:var(--dim);
+  padding:12px 8px 12px 0;text-align:right;overflow:hidden;user-select:none}
+#code{flex:1;background:transparent;border:none;resize:none;outline:none;color:#dce8f8;
+  font-family:'IBM Plex Mono',monospace;font-size:13px;line-height:1.75;padding:12px 14px;
+  caret-color:var(--blue);tab-size:2;white-space:pre;overflow:auto}
+#code::selection{background:rgba(56,176,238,.3)}
+.editor-foot{padding:7px 14px;border-top:1px solid var(--line);font-size:11px;color:var(--dim);display:flex;gap:16px;direction:ltr;font-family:'IBM Plex Mono',monospace}
+.term-scroll{flex:1;min-height:430px;max-height:520px;overflow-y:auto;background:var(--ink);padding:10px 0;scroll-behavior:smooth}
+.term-scroll::-webkit-scrollbar{width:9px}
+.term-scroll::-webkit-scrollbar-thumb{background:var(--line2);border-radius:9px}
+.tl{display:flex;gap:10px;padding:2.5px 14px;font-family:'IBM Plex Mono',monospace;font-size:12.5px;
+  line-height:1.65;border-right:2px solid transparent;animation:lineIn .25s ease}
+@keyframes lineIn{from{opacity:0;transform:translateY(5px)}}
+.tl:hover{background:rgba(255,255,255,.03)}
+.tt{color:#41527a;flex:none;direction:ltr}
+.tx{word-break:break-word}
+.t-sys .tx{color:#7d90b2}
+.t-info .tx{color:var(--cyan)}
+.t-ok .tx{color:var(--green)}
+.t-ok .tx::before{content:'✔ ';}
+.t-err .tx{color:var(--red)}
+.t-err .tx::before{content:'✘ ';font-weight:700}
+.t-msg .tx{color:#ffd28a}
+.t-msg .tx::before{content:'📩 '}
+.t-out .tx{color:#9ecbff}
+.t-out .tx::before{content:'📤 '}
+.tcur{padding:3px 14px;color:var(--green);font-family:'IBM Plex Mono',monospace;font-size:13px;animation:blink 1s step-end infinite}
+.dots{display:flex;gap:6px}
+.dots i{width:11px;height:11px;border-radius:50%}
+.dots i:nth-child(1){background:#ff5f56}.dots i:nth-child(2){background:#ffbd2e}.dots i:nth-child(3){background:#27c93f}
+.term-title{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--dim);direction:ltr}
+.term-actions{margin-right:auto;display:flex;gap:6px}
+.mini{background:none;border:1px solid var(--line2);color:var(--mut);font-family:'Cairo';font-size:11px;font-weight:600;border-radius:6px;padding:3px 10px;cursor:pointer;transition:.2s}
+.mini:hover{color:var(--txt);border-color:var(--blue)}
+.livebadge{font-size:10.5px;color:var(--red);font-weight:800;letter-spacing:1px;animation:blink 1.4s infinite}
+.lower{display:grid;grid-template-columns:1fr 1.2fr;gap:14px;margin-bottom:22px}
+.panel h3{font-family:'Lalezar',cursive;font-size:21px;font-weight:400;padding:12px 18px 4px;color:#fff}
+.feed{padding:6px 14px 14px;display:flex;flex-direction:column;gap:8px;min-height:180px}
+.feed-empty{color:var(--dim);font-size:13px;text-align:center;padding:44px 0}
+.fitem{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:9px 13px;
+  font-size:13px;animation:lineIn .3s ease;transition:.2s}
+.fitem:hover{border-color:var(--line2);transform:translateX(-3px)}
+.fitem b{color:var(--cyan)}
+.fitem .ftime{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--dim);direction:ltr;display:inline-block}
+.fitem div{color:var(--mut);margin-top:2px;word-break:break-word}
+.how-body{padding:4px 18px 16px;display:flex;flex-direction:column;gap:10px}
+.step{display:flex;gap:12px;align-items:flex-start}
+.step .n{flex:none;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;
+  font-family:'Lalezar',cursive;font-size:17px;color:#04160c;background:var(--green)}
+.step:nth-child(2) .n{background:var(--cyan)}
+.step:nth-child(3) .n{background:var(--amber)}
+.step p{font-size:13.5px;color:var(--mut);line-height:1.7;padding-top:3px}
+.step p b{color:var(--txt)}
+.note{border-color:rgba(255,180,84,.35)!important;background:linear-gradient(180deg,rgba(255,180,84,.06),var(--panel))!important}
+.note h3{color:var(--amber)}
+.note p{padding:0 18px 16px;font-size:13px;color:var(--mut);line-height:1.85}
+.note p b{color:var(--txt)}
+footer{border-top:1px solid var(--line);padding:16px 0 22px;color:var(--dim);font-size:12px}
+footer .wrap{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+footer b{color:var(--mut)}
+#toasts{position:fixed;bottom:22px;right:22px;z-index:99;display:flex;flex-direction:column;gap:8px}
+.toast{background:var(--panel);border:1px solid var(--line2);border-right:4px solid var(--green);
+  border-radius:9px;padding:11px 18px;font-size:13px;font-weight:600;box-shadow:0 8px 30px rgba(0,0,0,.5);
+  animation:toastIn .3s ease;max-width:320px}
+.toast.err{border-right-color:var(--red)}
+.toast.info{border-right-color:var(--blue)}
+@keyframes toastIn{from{opacity:0;transform:translateY(12px)}}
+.toast.out{opacity:0;transform:translateY(8px);transition:.3s}
+.reveal{opacity:0;transform:translateY(18px);transition:.6s ease}
+.reveal.in{opacity:1;transform:none}
+@media(max-width:1020px){
+  .grid,.lower{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .stat.spark{grid-column:span 2}
+  .brand h1{font-size:32px}
+  .tokenwrap input{width:100%}
+  .tokenwrap{width:100%}
+  .runzone{width:100%}
+}
+.opts{display:flex;gap:18px;flex-wrap:wrap;padding:0 20px 14px;font-size:12.5px;color:var(--mut)}
+.opts label{display:inline-flex;align-items:center;gap:7px;cursor:pointer}
+.opts input{accent-color:var(--green);width:16px;height:16px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;padding:8px 14px;border-bottom:1px solid var(--line);background:var(--panel2)}
+.toolbar .mini{padding:5px 12px;font-size:12px}
+a.mini{text-decoration:none;display:inline-block}
+.tools{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px}
+.tool-body{padding:14px 16px 16px;display:flex;flex-direction:column}
+.tool-body p.help{font-size:12.5px;color:var(--mut);line-height:1.8;margin-bottom:12px}
+.tools .panel h3{padding:12px 16px 0}
+.fld{display:flex;flex-direction:column;gap:5px;margin-bottom:10px}
+.fld>label{font-size:12px;color:var(--mut);font-weight:600}
+.fld input,.fld textarea,.fld select{background:var(--panel2);border:1px solid var(--line);color:var(--txt);border-radius:9px;
+  padding:9px 12px;font-family:'Cairo',sans-serif;font-size:13px;width:100%;transition:.2s}
+.fld input:focus,.fld textarea:focus,.fld select:focus,.simrow input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(56,176,238,.15)}
+.fld .ltr{direction:ltr;text-align:left;font-family:'IBM Plex Mono',monospace;font-size:12.5px}
+.fld textarea{resize:vertical;min-height:72px}
+.fld select option{background:var(--panel2)}
+.btn.small{padding:9px 18px;font-size:13.5px;align-self:flex-start}
+.btn.blue{background:var(--blue);color:#04121c;box-shadow:0 4px 16px rgba(56,176,238,.25)}
+.btn.blue:hover{transform:translateY(-2px)}
+.filebtn{display:inline-flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:12px}
+.filebtn input{display:none}
+.rowitem{display:flex;align-items:center;gap:8px;justify-content:space-between;background:var(--panel2);border:1px solid var(--line);
+  border-radius:9px;padding:7px 11px;margin-bottom:6px;font-size:12.5px;flex-wrap:wrap}
+.rowitem .nm{font-family:'IBM Plex Mono',monospace;direction:ltr;word-break:break-all}
+.subhead{font-size:12px;color:var(--dim);font-weight:700;margin:10px 0 6px}
+.libadd{display:flex;gap:8px}
+.libadd input{flex:1;min-width:0;background:var(--panel2);border:1px solid var(--line);color:var(--txt);border-radius:9px;padding:8px 12px;
+  font-family:'IBM Plex Mono',monospace;font-size:12px;direction:ltr;text-align:left}
+.chkrow{display:flex;gap:9px;align-items:flex-start;padding:8px 11px;border-radius:9px;margin-bottom:6px;font-size:12.5px;line-height:1.75;
+  background:var(--panel2);border:1px solid var(--line)}
+.chkrow .chk-tx{flex:1;word-break:break-word}
+.chkrow.err{border-color:rgba(255,107,122,.5)}
+.chkrow.warn{border-color:rgba(255,180,84,.45)}
+.chkrow.ok{border-color:rgba(63,220,143,.5);color:var(--green)}
+.simrow{display:flex;gap:8px;padding:8px 12px;border-top:1px solid var(--line);background:var(--panel2)}
+.simrow input{flex:1;min-width:0;background:var(--ink);border:1px solid var(--line);color:var(--txt);border-radius:9px;padding:8px 12px;font-family:'Cairo',sans-serif;font-size:13px}
+.logbtns{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px}
+#apiChip.bad{color:var(--amber)}
+@media(max-width:1020px){.tools{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}}
+.stat.spark canvas{flex:none;height:64px;width:100%;display:block}
+</style>
+</head>
+<body>
+<div class="glow g1"></div><div class="glow g2"></div>
+
+<div class="topstrip">
+  <div class="wrap">
+    <div>⚡ بوت هوست <span class="v">v3.0</span> · التشغيل يتم داخل متصفحك مباشرة — بدون سيرفر وسيط</div>
+    <div class="ts-left">
+      <span id="apiChip"><span class="dot"></span> جارِ فحص اتصال تيليجرام…</span>
+      <span id="clock" class="mono" style="direction:ltr"></span>
+    </div>
+  </div>
+</div>
+
+<header>
+  <div class="wrap">
+    <div class="brand">
+      <div class="logo">
+        <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
+          <rect x="5" y="10" width="24" height="18" rx="5" stroke="#38b0ee" stroke-width="2.2"/>
+          <circle cx="13" cy="19" r="2.4" fill="#3fdc8f"/><circle cx="21" cy="19" r="2.4" fill="#3fdc8f"/>
+          <path d="M17 10V5" stroke="#38b0ee" stroke-width="2.2"/><circle cx="17" cy="4" r="2" fill="#ffb454"/>
+          <path d="M12 24h10" stroke="#38b0ee" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div>
+        <h1>بوت <span>هوست</span></h1>
+        <p>استضف بوت تيليجرام مجاناً — الصق الكود، اضغط تشغيل، وخلصنا 🚀</p>
+      </div>
+    </div>
+    <div class="runzone">
+      <div class="tokenwrap">
+        <input id="token" type="password" placeholder="🔑 توكن البوت من @BotFather" autocomplete="off">
+        <button id="eye" title="إظهار التوكن">👁</button>
+      </div>
+      <button id="simBtn" class="btn ghost">🧪 جرّب بدون توكن</button>
+      <button id="runBtn" class="btn run">▶ تشغيل البوت</button>
+      <button id="restartBtn" class="btn icon hidden" title="إعادة تشغيل">⟳</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap statusline">
+  <div class="pill" id="pill"><span class="led"></span><span id="pillTxt">جاهز للتشغيل</span></div>
+  <div id="botChip" class="chip hidden"></div>
+  <div class="flex1"></div>
+  <span class="hint mono">Ctrl + Enter = تشغيل / إيقاف</span>
+</div>
+<div class="wrap opts">
+  <label><input type="checkbox" id="optAuto"> شغّل البوت تلقائياً كل ما أفتح الصفحة</label>
+  <label><input type="checkbox" id="optKeep"> أبقِ البوت شغّال بالخلفية (يمنع قفل الشاشة)</label>
+  <label><input type="checkbox" id="optRemember"> احفظ الكود والتوكن على هذا الجهاز</label>
+</div>
+
+<div class="wrap">
+  <section class="stats">
+    <div class="stat"><div class="s-label">⏱ مدة التشغيل</div><div class="s-val" id="stUp">00:00:00</div><div class="s-sub" id="stState">متوقف</div></div>
+    <div class="stat"><div class="s-label">📥 رسائل مستلمة</div><div class="s-val" id="stIn">0</div><div class="s-sub">من المستخدمين</div></div>
+    <div class="stat"><div class="s-label">📤 رسائل مرسلة</div><div class="s-val" id="stOut">0</div><div class="s-sub">ردود البوت</div></div>
+    <div class="stat"><div class="s-label">⚡ زمن الاستجابة</div><div class="s-val" id="stPing">—</div><div class="s-sub" id="stCmds">0 أمر منفّذ</div></div>
+    <div class="stat spark"><div class="s-label">📈 النشاط المباشر — رسائل لكل ثانية</div><canvas id="spark"></canvas></div>
+  </section>
+
+  <main class="grid">
+    <section class="panel reveal">
+      <div class="panel-head">
+        <span class="tab">bot.js</span>
+        <div class="chips" id="chips">
+          <button class="tchip" data-t="0">🌱 ترحيب بسيط</button>
+          <button class="tchip active" data-t="1">⚙️ بوت أوامر</button>
+          <button class="tchip" data-t="2">🔘 بوت أزرار</button>
+          <button class="tchip" data-t="3">🧠 ردود ذكية</button>
+          <button class="tchip warn" id="clearChip">🗑 مسح</button>
+        </div>
+      </div>
+      <div class="toolbar">
+        <button class="mini" id="openBtn">📂 فتح ملف بالمحرر</button>
+        <button class="mini" id="chkBtn">🔍 فحص الكود</button>
+        <button class="mini" id="dlBtn">💾 تنزيل الكود</button>
+        <button class="mini" id="expBtn">⬇ تصدير للسيرفر (24/7)</button>
+        <input type="file" id="openFile" accept=".js,.txt,.mjs,.cjs" class="hidden">
+      </div>
+      <div class="editor-body">
+        <div class="gutter" id="gutter">1</div>
+        <textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off"></textarea>
+      </div>
+      <div class="editor-foot"><span id="lnCount">lines: 1</span><span id="chCount">chars: 0</span><span style="margin-left:auto">JavaScript · Telegram Bot API</span></div>
+    </section>
+
+    <section class="panel reveal">
+      <div class="panel-head">
+        <div class="dots"><i></i><i></i><i></i></div>
+        <span class="term-title">console — bot.log</span>
+        <span class="livebadge hidden" id="liveBadge">● LIVE</span>
+        <div class="term-actions">
+          <button class="mini" id="copyBtn">نسخ</button>
+          <button class="mini" id="clearTerm">مسح</button>
+        </div>
+      </div>
+      <div class="term-scroll" id="termScroll">
+        <div id="logs"></div>
+        <div class="tcur">▊</div>
+      </div>
+      <div class="simrow hidden" id="simRow">
+        <input id="simIn" placeholder="اكتب رسالة للبوت (مثال: /help)" autocomplete="off">
+        <button class="mini" id="simSend">إرسال</button>
+      </div>
+    </section>
+  </main>
+
+  <section class="tools">
+    <div class="panel reveal" id="builderPanel">
+      <h3>🧩 باني الأوامر</h3>
+      <div class="tool-body">
+        <p class="help">سوّي أمر جديد بدون كتابة كود، وينضاف للمحرر مباشرة. في النص تقدر تكتب <span class="mono">{name}</span> لاسم المستخدم و<span class="mono">{args}</span> لما يكتبه بعد الأمر.</p>
+        <div class="fld"><label for="bName">اسم الأمر (إنجليزي)</label><input id="bName" class="ltr" placeholder="hello" autocomplete="off" autocapitalize="off"></div>
+        <div class="fld"><label for="bDesc">وصفه في قائمة تيليجرام (اختياري)</label><input id="bDesc" placeholder="يرحّب فيك"></div>
+        <div class="fld"><label for="bType">نوع الرد</label>
+          <select id="bType"><option value="text">نص</option><option value="photo">صورة من رابط</option><option value="buttons">نص + أزرار</option></select></div>
+        <div class="fld"><label for="bText">نص الرد</label><textarea id="bText" placeholder="أهلاً {name} 👋"></textarea></div>
+        <div class="fld hidden" id="bPhotoRow"><label for="bPhoto">رابط الصورة</label><input id="bPhoto" class="ltr" placeholder="https://…/image.jpg"></div>
+        <div class="fld hidden" id="bBtnsRow"><label for="bBtns">الأزرار — كل زر في سطر: <span class="mono">النص | معرّف</span> أو <span class="mono">النص | https://رابط</span></label>
+          <textarea id="bBtns" class="ltr" placeholder="🍕 بيتزا | pizza&#10;🌐 الموقع | https://example.com"></textarea></div>
+        <button class="btn blue small" id="bAdd">➕ أضف الأمر للكود</button>
+      </div>
+    </div>
+
+    <div class="panel reveal">
+      <h3>📁 الملفات والمكتبات</h3>
+      <div class="tool-body">
+        <p class="help">ارفع ملفات يستخدمها بوتك: كود <span class="mono">.js</span> (استدعيه بـ <span class="mono" dir="ltr">require('ملفك.js')</span>) أو بيانات <span class="mono">.json</span> أو نص (اقرأه بـ <span class="mono" dir="ltr">bot.file('x.txt')</span>). تنحفظ على جهازك.</p>
+        <label class="btn ghost small filebtn">📤 ارفع ملفات<input type="file" id="fileIn" multiple accept=".js,.json,.txt,.mjs,.cjs,.csv"></label>
+        <div id="fileList"></div>
+        <div class="subhead">مكتبة من رابط (CDN) — تتحمّل قبل تشغيل الكود</div>
+        <div class="libadd"><input id="libUrl" placeholder="https://cdn.jsdelivr.net/npm/…/lib.min.js" autocomplete="off"><button class="mini" id="libAdd">إضافة</button></div>
+        <div id="libList" style="margin-top:8px"></div>
+      </div>
+    </div>
+
+    <div class="panel reveal">
+      <h3>🔍 نتيجة فحص الكود</h3>
+      <div class="tool-body">
+        <p class="help">يفحص الأقواس والنصوص المفتوحة والأخطاء الشائعة قبل التشغيل. اضغط «فحص الكود» فوق المحرر، وكل خطأ له زر يوديك لسطره.</p>
+        <div id="chkOut"><div class="hint">ما فحصت الكود بعد.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="lower">
+    <div class="panel reveal">
+      <h3>📨 آخر الرسائل الواردة</h3>
+      <div class="feed" id="feed"><div class="feed-empty">بانتظار الرسائل… شغّل البوت أولاً</div></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="panel reveal">
+        <h3>🛠 كيف تشتغل؟ ثلاث خطوات وبس</h3>
+        <div class="how-body">
+          <div class="step"><span class="n">١</span><p><b>سوّي بوت:</b> افتح <span class="mono" dir="ltr">@BotFather</span> في تيليجرام، أرسل <span class="mono" dir="ltr">/newbot</span>، وانسخ التوكن.</p></div>
+          <div class="step"><span class="n">٢</span><p><b>جهّز الكود:</b> الصق كودك، أو اختر قالب جاهز، أو ابنِ أوامرك من «باني الأوامر»، أو افتح ملف من جوالك.</p></div>
+          <div class="step"><span class="n">٣</span><p><b>شغّل:</b> الصق التوكن واضغط «تشغيل». البوت يحفظ نفسه ويرجع يشتغل لما تفتح الصفحة.</p></div>
+        </div>
+      </div>
+      <div class="panel note reveal">
+        <h3>⚠️ ملاحظة صادقة عن الخلفية</h3>
+        <p>البوت يشتغل داخل المتصفح بـ Worker، والكود والتوكن محفوظين على جهازك، وأي وقت تفتح الصفحة يرجع يشتغل لحاله. لكن المتصفح <b>ما يضمن</b> يخلّي صفحة بالخلفية شغّالة ساعات، خصوصاً بالجوال — لو قفلت التبويب أو الجوال نام، يوقف. خيار «أبقِ البوت شغّال» يقلل هالمشكلة (يمنع قفل الشاشة ويشغّل صوت صامت)، ويفضل تضيف الصفحة للشاشة الرئيسية. <b>للتشغيل 24/7 فعلاً</b> حتى والجوال مطفي: اضغط «تصدير للسيرفر» وارفع الملف على Render أو Koyeb أو Railway (أغلبها فيها خطة مجانية).</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div><b>بوت هوست</b> · منصة تشغيل بوتات تيليجرام داخل المتصفح · مجانية 100% وبدون تسجيل</div>
+    <div class="mono" style="direction:ltr">Telegram Bot API · getUpdates long-polling</div>
+  </div>
+</footer>
+
+<div id="toasts"></div>
+
+<script>
+function botRuntime(self){
+  'use strict';
+  var AsyncFunction=Object.getPrototypeOf(async function(){}).constructor;
+  var running=false, token='', sim=false, offset=0, abortCtl=null, hbTimer=null, storeTimer=null;
+  var store={}, files={}, libs=[], timers=new Set(), modCache={}, simId=0, runId=0;
+  var H, me={id:0,username:'bot',first_name:'bot'}, cmdDesc=[];
+
+  var post=function(m){ self.postMessage(m); };
+  var sleep=function(ms){ return new Promise(function(r){ setTimeout(r,ms); }); };
+  var fmt=function(x){
+    if(typeof x==='string') return x;
+    if(x instanceof Error) return x.message;
+    try{ return JSON.stringify(x,null,2); }catch(e){ return String(x); }
+  };
+  var log=function(level){
+    var a=[].slice.call(arguments,1);
+    post({type:'log',level:level,text:a.map(fmt).join(' ')});
+  };
+  var consoleShim={
+    log:function(){ log.apply(null,['info'].concat([].slice.call(arguments))); },
+    info:function(){ log.apply(null,['info'].concat([].slice.call(arguments))); },
+    warn:function(){ log.apply(null,['info'].concat([].slice.call(arguments))); },
+    error:function(){ log.apply(null,['err'].concat([].slice.call(arguments))); }
+  };
+
+  function resetHandlers(){ H={commands:{},texts:[],message:null,callbacks:[],kinds:{}}; cmdDesc=[]; }
+  resetHandlers();
+
+  /* ---------- Telegram API ---------- */
+  async function api(method,params,signal,retried){
+    params=params||{};
+    if(sim) return simApi(method,params);
+    var t0=Date.now(), res, j;
+    res=await fetch('https://api.telegram.org/bot'+token+'/'+method,{
+      method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(params),signal:signal
+    });
+    try{ j=await res.json(); }catch(e){ throw new Error('رد غير مفهوم من تيليجرام (HTTP '+res.status+')'); }
+    if(!j.ok){
+      if(j.error_code===429 && !retried && method!=='getUpdates'){
+        var w=((j.parameters&&j.parameters.retry_after)||2)+1;
+        log('sys','تيليجرام طلب الانتظار '+w+' ثانية (حد الإرسال)…');
+        await sleep(w*1000);
+        return api(method,params,signal,true);
+      }
+      var e=new Error(j.description||('HTTP '+res.status));
+      e.code=j.error_code;
+      throw e;
+    }
+    if(method!=='getUpdates'){
+      post({type:'ping',ms:Date.now()-t0});
+      if(/^send/.test(method)) post({type:'out',chat:params.chat_id,text:params.text||params.caption||('['+method.slice(4)+']')});
+    }
+    return j.result;
+  }
+
+  async function simApi(method,p){
+    await sleep(120);
+    if(method==='getMe') return me;
+    if(/^send/.test(method)){
+      post({type:'out',chat:p.chat_id,text:p.text||p.caption||('['+method.slice(4)+']'),
+        buttons:(p.reply_markup&&p.reply_markup.inline_keyboard)||null});
+      post({type:'ping',ms:110+Math.floor(Math.random()*60)});
+      return {message_id:++simId,chat:{id:p.chat_id},date:Math.floor(Date.now()/1000),text:p.text};
+    }
+    if(method==='editMessageText'){
+      post({type:'out',chat:p.chat_id,text:'✏️ '+p.text,buttons:(p.reply_markup&&p.reply_markup.inline_keyboard)||null});
+      return true;
+    }
+    if(method==='answerCallbackQuery'){ if(p.text) log('sys','🔔 '+p.text); return true; }
+    log('sys','[تجربة] '+method);
+    return true;
+  }
+
+  function markup(o){
+    if(!o) return undefined;
+    if(o.buttons){
+      var rows=Array.isArray(o.buttons[0])?o.buttons:[o.buttons];
+      return {inline_keyboard:rows.map(function(r){ return r.map(function(b){
+        return b.url?{text:b.text,url:b.url}:{text:b.text,callback_data:String(b.data!==undefined?b.data:b.text).slice(0,64)};
+      }); })};
+    }
+    if(o.keyboard){
+      var kr=Array.isArray(o.keyboard[0])?o.keyboard:[o.keyboard];
+      return {keyboard:kr.map(function(r){ return r.map(function(t){ return typeof t==='string'?{text:t}:t; }); }),resize_keyboard:true};
+    }
+    if(o.removeKeyboard) return {remove_keyboard:true};
+    return undefined;
+  }
+
+  async function sendText(chat,text,o){
+    o=o||{};
+    text=String(text===undefined?'':text);
+    if(!text) text='…';
+    var chunks=[];
+    for(var i=0;i<text.length;i+=4000) chunks.push(text.slice(i,i+4000));
+    var last;
+    for(var k=0;k<chunks.length;k++){
+      var p={chat_id:chat,text:chunks[k]};
+      if(o.parse) p.parse_mode=o.parse;
+      if(o.replyTo) p.reply_to_message_id=o.replyTo;
+      if(o.silent) p.disable_notification=true;
+      if(k===chunks.length-1){ var rm=markup(o); if(rm) p.reply_markup=rm; }
+      last=await api('sendMessage',p);
+    }
+    return last;
+  }
+
+  /* ---------- user-facing bot object ---------- */
+  var bot={
+    onCommand:function(name,fn){ (Array.isArray(name)?name:[name]).forEach(function(n){ H.commands[String(n).replace(/^\//,'').toLowerCase()]=fn; }); },
+    onText:function(pat,fn){ H.texts.push({pat:pat,fn:fn}); },
+    onMessage:function(fn){ H.message=fn; },
+    onCallback:function(a,b){ if(typeof a==='function') H.callbacks.push({pat:null,fn:a}); else H.callbacks.push({pat:a,fn:b}); },
+    on:function(kind,fn){ (H.kinds[kind]=H.kinds[kind]||[]).push(fn); },
+    describe:function(cmd,text){ cmdDesc.push({command:String(cmd).replace(/^\//,'').toLowerCase(),description:String(text).slice(0,200)}); },
+    api:function(m,p){ return api(m,p); },
+    send:function(chat,text,o){ return sendText(chat,text,o); },
+    file:function(n){ n=String(n).replace(/^\.?\//,''); if(!(n in files)) throw new Error("الملف '"+n+"' غير موجود"); return files[n]; },
+    sleep:sleep,
+    every:function(ms,fn){ return tsi(fn,ms); },
+    after:function(ms,fn){ return tst(fn,ms); },
+    loadLib:function(url){
+      if(typeof importScripts==='function'){ importScripts(url); }
+      else throw new Error('تحميل مكتبة من رابط يحتاج وضع Worker (غير متاح هنا)');
+    },
+    store:{
+      get:function(k,d){ return Object.prototype.hasOwnProperty.call(store,k)?store[k]:d; },
+      set:function(k,v){ store[k]=v; saveStore(); return v; },
+      del:function(k){ delete store[k]; saveStore(); },
+      all:function(){ return JSON.parse(JSON.stringify(store)); }
+    }
+  };
+  Object.defineProperty(bot,'me',{get:function(){ return me; }});
+
+  function saveStore(){
+    clearTimeout(storeTimer);
+    storeTimer=setTimeout(function(){
+      post({type:'store',data:store});
+      if(typeof self.persistStore==='function') self.persistStore(store);
+    },400);
+  }
+
+  /* tracked timers: everything is cleared on stop */
+  function guard(fn,a){ return async function(){ try{ await fn.apply(null,a); }catch(e){ log('err','خطأ في مؤقّت: '+fmt(e)); } }; }
+  function tst(fn,ms){ var a=[].slice.call(arguments,2); var id=setTimeout(function(){ timers.delete(id); guard(fn,a)(); },ms); timers.add(id); return id; }
+  function tsi(fn,ms){ var a=[].slice.call(arguments,2); var id=setInterval(guard(fn,a),ms); timers.add(id); return id; }
+  function ctt(id){ clearTimeout(id); timers.delete(id); }
+  function cti(id){ clearInterval(id); timers.delete(id); }
+
+  function makeRequire(){
+    var req=function(name){
+      var key=String(name).replace(/^\.?\//,'');
+      if(modCache[key]) return modCache[key].exports;
+      if(!(key in files)){
+        if((key+'.js') in files) return req(key+'.js');
+        throw new Error("الملف '"+key+"' غير موجود — ارفعه من قسم «الملفات والمكتبات»");
+      }
+      var mod={exports:{}}; modCache[key]=mod;
+      if(/\.json$/i.test(key)){ mod.exports=JSON.parse(files[key]); return mod.exports; }
+      var f=new Function('module','exports','require','bot','console','setTimeout','setInterval','clearTimeout','clearInterval',files[key]);
+      f(mod,mod.exports,req,bot,consoleShim,tst,tsi,ctt,cti);
+      return mod.exports;
+    };
+    return req;
+  }
+
+  /* ---------- updates ---------- */
+  function displayName(u){ return [u.first_name,u.last_name].filter(Boolean).join(' ')||u.username||String(u.id); }
+
+  function makeCtx(msg,cq){
+    var chat=msg.chat, from=(cq?cq.from:msg.from)||{id:0,first_name:'?'};
+    var ctx={
+      message:msg, chat:chat, from:from, text:msg.text||msg.caption||'', args:[], argsText:'', match:null, data:cq?cq.data:null,
+      store:bot.store, bot:bot,
+      reply:function(t,o){ return sendText(chat.id,t,o); },
+      quote:function(t,o){ return sendText(chat.id,t,Object.assign({replyTo:msg.message_id},o)); },
+      send:function(id,t,o){ return sendText(id,t,o); },
+      photo:function(url,cap,o){ return api('sendPhoto',{chat_id:chat.id,photo:url,caption:cap,reply_markup:markup(o)}); },
+      document:function(url,cap,o){ return api('sendDocument',{chat_id:chat.id,document:url,caption:cap,reply_markup:markup(o)}); },
+      dice:function(e){ return api('sendDice',{chat_id:chat.id,emoji:e||'🎲'}); },
+      typing:function(){ return api('sendChatAction',{chat_id:chat.id,action:'typing'}); },
+      api:function(m,p){ return api(m,Object.assign({chat_id:chat.id},p)); }
+    };
+    if(cq){
+      ctx.answer=function(t,alert){ ctx._answered=true; return api('answerCallbackQuery',{callback_query_id:cq.id,text:t,show_alert:!!alert}); };
+      ctx.edit=function(t,o){
+        o=o||{};
+        return api('editMessageText',{chat_id:chat.id,message_id:msg.message_id,text:String(t),parse_mode:o.parse,reply_markup:markup(o)});
+      };
+    }
+    return ctx;
+  }
+
+  function matchPat(pat,text){
+    if(pat instanceof RegExp){ pat.lastIndex=0; return text.match(pat); }
+    if(typeof pat==='function') return pat(text)||null;
+    return text.toLowerCase().indexOf(String(pat).toLowerCase())>=0?[String(pat)]:null;
+  }
+
+  var KINDS=['photo','document','sticker','voice','video','location','contact','audio','animation','video_note','poll'];
+
+  async function handleMessage(m){
+    var ctx=makeCtx(m), text=ctx.text;
+    var kind=KINDS.filter(function(k){ return m[k]; })[0];
+    post({type:'in',from:displayName(ctx.from),text:text||('['+(kind||'رسالة')+']')});
+    try{
+      if(text.charAt(0)==='/'){
+        var mt=text.match(/^\/([A-Za-z0-9_]+)(?:@(\w+))?(?:\s+([\s\S]*))?$/);
+        if(mt){
+          if(mt[2] && me.username && mt[2].toLowerCase()!==me.username.toLowerCase()) return;
+          var cmd=mt[1].toLowerCase(), fn=H.commands[cmd];
+          ctx.argsText=(mt[3]||'').trim();
+          ctx.args=ctx.argsText?ctx.argsText.split(/\s+/):[];
+          if(fn){ post({type:'cmd',name:cmd}); await fn(ctx); return; }
+        }
+      }
+      for(var i=0;i<H.texts.length;i++){
+        var r=matchPat(H.texts[i].pat,text);
+        if(r && text){ ctx.match=r; await H.texts[i].fn(ctx); return; }
+      }
+      if(kind && H.kinds[kind]){ for(var k=0;k<H.kinds[kind].length;k++) await H.kinds[kind][k](ctx); return; }
+      if(H.message) await H.message(ctx);
+    }catch(e){ log('err','خطأ في الكود: '+fmt(e)); }
+  }
+
+  async function handleCallback(cq){
+    var msg=cq.message||{chat:{id:cq.from.id},message_id:0};
+    var ctx=makeCtx(msg,cq);
+    post({type:'in',from:displayName(cq.from),text:'🔘 '+cq.data});
+    try{
+      for(var i=0;i<H.callbacks.length;i++){
+        var c=H.callbacks[i], r;
+        if(c.pat===null) r=[cq.data];
+        else if(typeof c.pat==='string') r=cq.data===c.pat?[cq.data]:null;
+        else r=matchPat(c.pat,cq.data||'');
+        if(r){ ctx.match=r; await c.fn(ctx); break; }
+      }
+    }catch(e){ log('err','خطأ في الكود: '+fmt(e)); }
+    if(!ctx._answered){ try{ await api('answerCallbackQuery',{callback_query_id:cq.id}); }catch(e){} }
+  }
+
+  async function handleUpdate(u){
+    try{
+      if(u.message||u.edited_message) await handleMessage(u.message||u.edited_message);
+      else if(u.callback_query) await handleCallback(u.callback_query);
+    }catch(e){ log('err',fmt(e)); }
+  }
+
+  async function pollLoop(myRun){
+    var backoff=1000;
+    while(running && myRun===runId){
+      try{
+        abortCtl=(typeof AbortController!=='undefined')?new AbortController():null;
+        var ups=await api('getUpdates',{offset:offset,timeout:25,allowed_updates:['message','edited_message','callback_query']},abortCtl&&abortCtl.signal);
+        backoff=1000;
+        post({type:'alive'});
+        for(var i=0;i<ups.length;i++){
+          offset=ups[i].update_id+1;
+          post({type:'offset',value:offset});
+          handleUpdate(ups[i]);
+        }
+      }catch(e){
+        if(!running || myRun!==runId) break;
+        if(e&&e.name==='AbortError') break;
+        if(e.code===401){ log('err','التوكن غير صحيح (401) — تأكد منه من @BotFather'); fail(); break; }
+        if(e.code===409) log('err','تعارض 409: نسخة ثانية من البوت شغّالة (جهاز أو تبويب آخر) أو في Webhook. أغلق النسخة الأخرى.');
+        else log('err','انقطع الاتصال: '+fmt(e)+' — أعيد المحاولة…');
+        await sleep(backoff);
+        backoff=Math.min(backoff*2,15000);
+      }
+    }
+  }
+
+  /* ---------- simulator ---------- */
+  var simFrom={id:42,first_name:'تجربة',username:'tester'}, simChat={id:42,type:'private',first_name:'تجربة'};
+  function simIncoming(text){
+    simId++;
+    handleUpdate({update_id:simId,message:{message_id:simId,date:Math.floor(Date.now()/1000),chat:simChat,from:simFrom,text:String(text)}});
+  }
+  function simCallback(data){
+    simId++;
+    handleUpdate({update_id:simId,callback_query:{id:String(simId),from:simFrom,message:{message_id:simId,chat:simChat},data:String(data)}});
+  }
+
+  /* ---------- lifecycle ---------- */
+  function cleanup(){
+    running=false;
+    if(abortCtl){ try{ abortCtl.abort(); }catch(e){} }
+    clearInterval(hbTimer); hbTimer=null;
+    timers.forEach(function(id){ clearTimeout(id); clearInterval(id); });
+    timers.clear();
+  }
+  function fail(){ cleanup(); post({type:'status',state:'err'}); }
+  function stop(){ cleanup(); post({type:'status',state:'stopped'}); }
+
+  async function start(cfg){
+    cleanup(); runId++;
+    var myRun=runId;
+    token=cfg.token||''; sim=!!cfg.sim; offset=cfg.offset||0;
+    store=cfg.store||{}; files=cfg.files||{}; libs=cfg.libs||[]; modCache={};
+    resetHandlers(); running=true;
+    post({type:'status',state:'starting'});
+    try{
+      if(sim) me={id:1,is_bot:true,first_name:'SimBot',username:'sim_bot'};
+      else me=await api('getMe');
+      if(myRun!==runId) return;
+      if(!sim){
+        try{ await api('deleteWebhook',{drop_pending_updates:false}); }
+        catch(e){ log('sys','تنبيه: ما قدرت أحذف الـ Webhook: '+fmt(e)); }
+      }
+      for(var i=0;i<libs.length;i++){
+        try{ bot.loadLib(libs[i]); log('sys','تم تحميل المكتبة: '+libs[i]); }
+        catch(e){ log('err','فشل تحميل المكتبة '+libs[i]+': '+fmt(e)); }
+      }
+      var fn=new AsyncFunction('bot','require','console','setTimeout','setInterval','clearTimeout','clearInterval','module','exports',cfg.code);
+      var mod={exports:{}};
+      Promise.resolve(fn(bot,makeRequire(),consoleShim,tst,tsi,ctt,cti,mod,mod.exports))
+        .catch(function(e){ log('err','خطأ في تشغيل الكود: '+fmt(e)); });
+      await sleep(0);
+      if(!sim && cmdDesc.length){
+        try{ await api('setMyCommands',{commands:cmdDesc}); log('sys','تم تحديث قائمة أوامر البوت ('+cmdDesc.length+')'); }
+        catch(e){ log('sys','تنبيه: تعذر تحديث قائمة الأوامر: '+fmt(e)); }
+      }
+      if(myRun!==runId) return;
+      post({type:'status',state:'on',bot:'@'+me.username,name:me.first_name});
+      hbTimer=setInterval(function(){ post({type:'alive'}); },4000);
+      log('ok','البوت @'+me.username+' شغّال — بانتظار الرسائل');
+      if(sim) setTimeout(function(){ if(running && myRun===runId) simIncoming('/start'); },600);
+      else pollLoop(myRun);
+    }catch(e){
+      if(myRun!==runId) return;
+      if(e&&e.code===401) log('err','التوكن غير صحيح (401) — تأكد منه من @BotFather');
+      else log('err','فشل التشغيل: '+fmt(e));
+      fail();
+    }
+  }
+
+  self.onmessage=function(e){
+    var m=e.data||{};
+    if(m.type==='start') start(m);
+    else if(m.type==='stop') stop();
+    else if(m.type==='simMsg') simIncoming(m.text);
+    else if(m.type==='simCb') simCallback(m.data);
+  };
+}
+
+/* ===== فاحص الكود ===== */
+var KNOWN_BOT=['onCommand','onText','onMessage','onCallback','on','describe','api','send','file','sleep','every','after','loadLib','store','me'];
+var KNOWN_CTX=['message','chat','from','text','args','argsText','match','data','store','bot','reply','quote','send','photo','document','dice','typing','api','answer','edit'];
+
+function scanBalance(s){
+  var pairs={')':'(',']':'[','}':'{'}, open={'(':')','[':']','{':'}'};
+  var stack=[], modes=[{m:'code',line:1}], line=1, i=0, prev='';
+  function err(l,msg){ return {line:l,msg:msg}; }
+  while(i<s.length){
+    var c=s[i], n=s[i+1], top=modes[modes.length-1];
+    if(c==='\n') line++;
+    if(top.m==='tpl'){
+      if(c==='\\'){ if(n==='\n') line++; i+=2; continue; }
+      if(c==='`'){ modes.pop(); prev='`'; i++; continue; }
+      if(c==='$'&&n==='{'){ stack.push({ch:'${',line:line}); modes.push({m:'code',line:line}); i+=2; prev='{'; continue; }
+      i++; continue;
+    }
+    if(c==='/'&&n==='/'){ while(i<s.length&&s[i]!=='\n') i++; continue; }
+    if(c==='/'&&n==='*'){
+      var j=s.indexOf('*/',i+2);
+      var chunk=s.slice(i,j<0?s.length:j+2);
+      var start=line; line+=(chunk.match(/\n/g)||[]).length;
+      if(j<0) return err(start,'تعليق /* مفتوح وما انقفل بـ */ — غالباً الكود مقطوع');
+      i=j+2; continue;
+    }
+    if(c==='"'||c==="'"){
+      var q=c, sl=line; i++;
+      while(i<s.length&&s[i]!==q&&s[i]!=='\n'){ if(s[i]==='\\') i++; i++; }
+      if(s[i]!==q) return err(sl,'نص بين علامتي '+q+' ما انقفل في نفس السطر');
+      i++; prev=q; continue;
+    }
+    if(c==='`'){ modes.push({m:'tpl',line:line}); i++; continue; }
+    if(c==='/'){
+      if(prev===''||'(,=:[!&|?{};+-*%<>~^'.indexOf(prev)>=0){
+        i++; var cls=false;
+        while(i<s.length&&s[i]!=='\n'){
+          if(s[i]==='\\'){ i+=2; continue; }
+          if(s[i]==='[') cls=true; else if(s[i]===']') cls=false; else if(s[i]==='/'&&!cls) break;
+          i++;
+        }
+        i++; prev='/'; continue;
+      }
+      prev='/'; i++; continue;
+    }
+    if(open[c]){ stack.push({ch:c,line:line}); prev=c; i++; continue; }
+    if(pairs[c]){
+      var t=stack[stack.length-1];
+      if(c==='}'&&t&&t.ch==='${'){ stack.pop(); modes.pop(); prev='}'; i++; continue; }
+      if(!t) return err(line,'القوس '+c+' زائد — ما له قوس فتح');
+      if(t.ch!==pairs[c]) return err(line,'القوس '+c+' ما يطابق '+t.ch+' المفتوح في سطر '+t.line);
+      stack.pop(); prev=c; i++; continue;
+    }
+    if(!/\s/.test(c)) prev=c;
+    i++;
+  }
+  var lastMode=modes[modes.length-1];
+  if(lastMode.m==='tpl') return err(lastMode.line,'نص القالب ` المفتوح في سطر '+lastMode.line+' ما انقفل — الكود غالباً مقطوع');
+  if(stack.length){ var u=stack[stack.length-1]; return err(u.line,'القوس '+u.ch+' المفتوح في سطر '+u.line+' ما انقفل — الكود غالباً مقطوع'); }
+  return null;
+}
+
+function lineOf(src,idx){ return src.slice(0,idx).split('\n').length; }
+
+function checkCode(src,fileNames){
+  var res=[], files=fileNames||[];
+  var add=function(level,line,msg){ res.push({level:level,line:line,msg:msg}); };
+  if(!src.trim()){ add('err',0,'المحرر فاضي — اكتب كود أو اختر قالب'); return res; }
+
+  if(/(^|\n)\s*(import\s+[\w{*'"]|export\s+(default|const|function|class|async))/.test(src)){
+    add('err',0,'import / export غير مدعومة. استخدم require("ملف.js") للملفات المرفوعة أو bot.loadLib("رابط") للمكتبات');
+    return res;
+  }
+  var syntaxOk=true;
+  try{
+    var AF=Object.getPrototypeOf(async function(){}).constructor;
+    new AF('bot','require','console','setTimeout','setInterval','clearTimeout','clearInterval','module','exports',src);
+  }catch(e){
+    syntaxOk=false;
+    var sb=scanBalance(src);
+    if(sb) add('err',sb.line,sb.msg);
+    add('err',sb?sb.line:0,'خطأ في الصياغة: '+e.message);
+  }
+  if(!syntaxOk) return res;
+
+  var sb2=scanBalance(src);
+  if(sb2) add('warn',sb2.line,sb2.msg);
+
+  if(!/\bbot\.(onCommand|onText|onMessage|onCallback|on)\s*\(/.test(src))
+    add('warn',0,'ما في أي معالج — استخدم bot.onCommand أو bot.onMessage عشان البوت يرد');
+
+  var re, m, seen={};
+  re=/\bbot\.([A-Za-z_]\w*)/g;
+  while((m=re.exec(src))){
+    if(KNOWN_BOT.indexOf(m[1])<0 && !seen['b'+m[1]]){ seen['b'+m[1]]=1;
+      add('warn',lineOf(src,m.index),'bot.'+m[1]+' غير موجودة في المنصة. المتاح: '+KNOWN_BOT.join(', ')); }
+  }
+  re=/\bctx\.([A-Za-z_]\w*)/g;
+  while((m=re.exec(src))){
+    if(KNOWN_CTX.indexOf(m[1])<0 && !seen['c'+m[1]]){ seen['c'+m[1]]=1;
+      add('warn',lineOf(src,m.index),'ctx.'+m[1]+' غير موجودة. المتاح: '+KNOWN_CTX.join(', ')); }
+  }
+  re=/\brequire\(\s*['"`]([^'"`]+)['"`]\s*\)/g;
+  while((m=re.exec(src))){
+    var key=m[1].replace(/^\.?\//,'');
+    if(files.indexOf(key)<0 && files.indexOf(key+'.js')<0)
+      add('err',lineOf(src,m.index),"require('"+m[1]+"') — الملف غير مرفوع. ارفعه من «الملفات والمكتبات»");
+  }
+  if(/\b(document|window|localStorage|alert|prompt)\b\s*[.(]/.test(src))
+    add('warn',0,'document / window / localStorage / alert غير متاحة — البوت يشتغل بالخلفية بدون صفحة. استخدم ctx.store للتخزين');
+  if(/\bprocess\.|require\(\s*['"](fs|http|https|path|os|child_process|node-telegram-bot-api|telegraf|grammy)['"]/.test(src))
+    add('warn',0,'مكتبات Node (fs / telegraf / node-telegram-bot-api…) ما تشتغل داخل المتصفح. اكتب البوت بأوامر المنصة (bot.onCommand)');
+  if(/\b\d{8,10}:[A-Za-z0-9_-]{35}\b/.test(src))
+    add('warn',0,'يبدو أن التوكن مكتوب داخل الكود! احذفه وحطه في خانة التوكن بالأعلى — لا تشارك الكود وفيه التوكن');
+  re=/\bctx\.(reply|send|photo|document|dice|typing|answer|edit|quote)\(/g;
+  var noAwait=0;
+  while((m=re.exec(src))){
+    var before=src.slice(Math.max(0,m.index-12),m.index);
+    if(!/(await|return)\s*$/.test(before)) noAwait++;
+  }
+  if(noAwait>0) add('info',0,noAwait+' استدعاء ctx.* بدون await — الرسائل ممكن توصل بغير ترتيب أو الأخطاء تضيع. الأفضل تكتب await قبلها');
+  return res;
+}
+
+var T=[];
+T[0]=`// 🌱 بوت ترحيب — بسيط
+bot.onCommand('start', async (ctx) => {
+  await ctx.reply('أهلاً ' + ctx.from.first_name + ' 👋\\nأنا بوت يشتغل من بوت هوست!');
+});
+bot.describe('start', 'بدء المحادثة');
+
+// أي رسالة ثانية
+bot.onMessage(async (ctx) => {
+  await ctx.reply('وصلتني رسالتك: ' + ctx.text);
+});
+`;
+T[1]=`// ⚙️ بوت أوامر — كل أمر له رد
+bot.onCommand('start', async (ctx) => {
+  await ctx.reply('أهلاً ' + ctx.from.first_name + ' 👋\\nاكتب /help عشان تشوف الأوامر.');
+});
+
+bot.onCommand('help', async (ctx) => {
+  await ctx.reply(
+    'الأوامر المتاحة:\\n' +
+    '/ping — فحص البوت\\n' +
+    '/time — الوقت الحين\\n' +
+    '/echo نص — أكرر كلامك\\n' +
+    '/dice — رمي نرد\\n' +
+    '/count — عدّاد محفوظ\\n' +
+    '/id — رقم حسابك'
+  );
+});
+
+bot.onCommand('ping', async (ctx) => { await ctx.reply('pong 🏓'); });
+
+bot.onCommand('time', async (ctx) => {
+  await ctx.reply('🕒 ' + new Date().toLocaleString('ar-SA'));
+});
+
+bot.onCommand('echo', async (ctx) => {
+  await ctx.reply(ctx.argsText || 'اكتب نص بعد الأمر، مثال: /echo مرحبا');
+});
+
+bot.onCommand('dice', async (ctx) => { await ctx.dice('🎲'); });
+
+bot.onCommand('id', async (ctx) => {
+  await ctx.reply('رقمك: ' + ctx.from.id + '\\nرقم المحادثة: ' + ctx.chat.id);
+});
+
+// عدّاد يبقى محفوظ حتى لو أغلقت الصفحة
+bot.onCommand('count', async (ctx) => {
+  const n = ctx.store.get('count', 0) + 1;
+  ctx.store.set('count', n);
+  await ctx.reply('عدد المرات: ' + n);
+});
+
+// وصف الأوامر يظهر في قائمة البوت داخل تيليجرام
+bot.describe('help', 'قائمة الأوامر');
+bot.describe('ping', 'فحص البوت');
+bot.describe('time', 'الوقت الحين');
+bot.describe('dice', 'رمي نرد');
+bot.describe('count', 'عدّاد محفوظ');
+`;
+T[2]=`// 🔘 بوت أزرار — أزرار تحت الرسالة
+bot.onCommand('start', async (ctx) => {
+  await ctx.reply('اختر من القائمة 👇', {
+    buttons: [
+      [{ text: '🍕 بيتزا', data: 'pizza' }, { text: '🍔 برجر', data: 'burger' }],
+      [{ text: '🌐 موقعنا', url: 'https://example.com' }]
+    ]
+  });
+});
+
+bot.onCallback('pizza', async (ctx) => {
+  await ctx.answer('اخترت بيتزا');
+  await ctx.edit('🍕 ممتاز! طلبك بيتزا.');
+});
+
+bot.onCallback('burger', async (ctx) => {
+  await ctx.answer('اخترت برجر');
+  await ctx.edit('🍔 ممتاز! طلبك برجر.');
+});
+`;
+T[3]=`// 🧠 ردود ذكية — يرد حسب الكلمات
+bot.onCommand('start', async (ctx) => {
+  await ctx.reply('هلا ' + ctx.from.first_name + '! جرّب تقول: مرحبا، شكراً، كم الساعة، أو رقم مثل 5+3');
+});
+
+bot.onText(/مرحبا|هلا|السلام/, async (ctx) => {
+  await ctx.reply('وعليكم السلام والرحمة 🌹');
+});
+
+bot.onText(/شكر/, async (ctx) => {
+  await ctx.reply('العفو، في الخدمة 🙏');
+});
+
+bot.onText(/كم الساعة|الوقت/, async (ctx) => {
+  await ctx.reply('🕒 ' + new Date().toLocaleTimeString('ar-SA'));
+});
+
+// حاسبة بسيطة: 12*3 أو 5+3
+bot.onText(/^\\s*(-?\\d+(?:\\.\\d+)?)\\s*([+\\-*\\/])\\s*(-?\\d+(?:\\.\\d+)?)\\s*$/, async (ctx) => {
+  const a = parseFloat(ctx.match[1]), op = ctx.match[2], b = parseFloat(ctx.match[3]);
+  const r = op === '+' ? a + b : op === '-' ? a - b : op === '*' ? a * b : a / b;
+  await ctx.reply('= ' + r);
+});
+
+bot.onMessage(async (ctx) => {
+  await ctx.reply('ما فهمت 🤔 جرّب /start');
+});
+`;
+
+/* ===== الواجهة والتحكم ===== */
+var $=function(id){ return document.getElementById(id); };
+var code=$('code'), gutter=$('gutter'), logs=$('logs'), termScroll=$('termScroll');
+var runBtn=$('runBtn'), simBtn=$('simBtn'), restartBtn=$('restartBtn');
+var pill=$('pill'), pillTxt=$('pillTxt'), botChip=$('botChip');
+
+/* ---------- تخزين محلي (يرجع لذاكرة مؤقتة إذا المتصفح منعه) ---------- */
+var memStore={};
+var LS={
+  get:function(k,d){ try{ var v=localStorage.getItem(k); return v===null?d:JSON.parse(v); }catch(e){ return k in memStore?memStore[k]:d; } },
+  set:function(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); return true; }catch(e){ memStore[k]=v; return false; } },
+  del:function(k){ try{ localStorage.removeItem(k); }catch(e){} delete memStore[k]; }
+};
+
+var S={
+  code:LS.get('bh_code',null), token:LS.get('bh_token',''), running:LS.get('bh_running',false),
+  offset:LS.get('bh_offset',0), store:LS.get('bh_store',{}), files:LS.get('bh_files',{}), libs:LS.get('bh_libs',[]),
+  opts:Object.assign({remember:true,keep:true,auto:true},LS.get('bh_opts',{})),
+  tpl:LS.get('bh_tpl',1), stats:LS.get('bh_stats',{in:0,out:0,cmds:0}), sim:false
+};
+
+function toast(msg,type){
+  var d=document.createElement('div'); d.className='toast '+(type||''); d.textContent=msg;
+  $('toasts').appendChild(d);
+  setTimeout(function(){ d.classList.add('out'); setTimeout(function(){ d.remove(); },350); },3600);
+}
+var sleepMs=function(ms){ return new Promise(function(r){ setTimeout(r,ms); }); };
+function bump(el){ el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }
+function debounce(fn,ms){ var t; return function(){ clearTimeout(t); var a=arguments; t=setTimeout(function(){ fn.apply(null,a); },ms); }; }
+
+/* ---------- السجل ---------- */
+var rawLogs=[], autoscroll=true, savedLogs=LS.get('bh_logs',[]);
+var persistLogs=debounce(function(){ LS.set('bh_logs',savedLogs.slice(-80)); },800);
+function addLogLine(type,text,t,buttons){
+  var el=document.createElement('div'); el.className='tl t-'+type;
+  el.innerHTML='<span class="tt">'+t+'</span><span class="tx" dir="auto"></span>';
+  el.querySelector('.tx').textContent=text;
+  if(buttons&&buttons.length){
+    var bw=document.createElement('div'); bw.className='logbtns';
+    buttons.forEach(function(row){ row.forEach(function(b){
+      if(b.url){ var a=document.createElement('a'); a.className='mini'; a.textContent='🔗 '+b.text; a.href=b.url; a.target='_blank'; a.rel='noopener'; bw.appendChild(a); }
+      else { var bt=document.createElement('button'); bt.className='mini'; bt.textContent=b.text; bt.onclick=function(){ if(rt) rt.post({type:'simCb',data:b.callback_data}); }; bw.appendChild(bt); }
+    }); });
+    el.querySelector('.tx').appendChild(bw);
+  }
+  logs.appendChild(el);
+  while(logs.children.length>400) logs.removeChild(logs.firstChild);
+  if(autoscroll) termScroll.scrollTop=termScroll.scrollHeight;
+}
+function log(type,text,buttons){
+  var t=new Date().toTimeString().slice(0,8);
+  addLogLine(type,text,t,buttons);
+  rawLogs.push('['+t+'] '+text);
+  if(!S.sim){ savedLogs.push({type:type,text:text,t:t}); persistLogs(); }
+}
+termScroll.addEventListener('scroll',function(){ autoscroll=termScroll.scrollTop+termScroll.clientHeight>termScroll.scrollHeight-40; });
+
+/* ---------- المحرر ---------- */
+var saveCode=debounce(function(){ if(S.opts.remember) LS.set('bh_code',code.value); },500);
+function updateEditor(){
+  var n=code.value.split('\n').length, g=[];
+  for(var i=1;i<=n;i++) g.push(i);
+  gutter.innerHTML=g.join('<br>');
+  $('lnCount').textContent='lines: '+n;
+  $('chCount').textContent='chars: '+code.value.length;
+  gutter.scrollTop=code.scrollTop;
+}
+code.addEventListener('input',function(){ updateEditor(); saveCode(); });
+code.addEventListener('scroll',function(){ gutter.scrollTop=code.scrollTop; });
+code.addEventListener('keydown',function(e){
+  if(e.key==='Tab'){
+    e.preventDefault();
+    var s=code.selectionStart, en=code.selectionEnd;
+    code.value=code.value.slice(0,s)+'  '+code.value.slice(en);
+    code.selectionStart=code.selectionEnd=s+2; updateEditor(); saveCode();
+  }
+});
+function setActiveChip(i){
+  document.querySelectorAll('.tchip[data-t]').forEach(function(c){ c.classList.toggle('active',String(c.dataset.t)===String(i)); });
+}
+document.querySelectorAll('.tchip[data-t]').forEach(function(c){
+  c.addEventListener('click',function(){
+    var i=+c.dataset.t;
+    if(code.value.trim() && code.value!==T[S.tpl] && !confirm('الكود الحالي بينمسح ويتبدل بالقالب. تكمل؟')) return;
+    code.value=T[i]; S.tpl=i; LS.set('bh_tpl',i); setActiveChip(i); updateEditor(); saveCode();
+    toast('تم تحميل القالب','info');
+  });
+});
+$('clearChip').addEventListener('click',function(){
+  if(code.value.trim() && !confirm('تمسح الكود كله؟')) return;
+  code.value=''; updateEditor(); saveCode(); setActiveChip(-1);
+});
+function gotoLine(line){
+  var lines=code.value.split('\n'), pos=0;
+  for(var i=0;i<line-1&&i<lines.length;i++) pos+=lines[i].length+1;
+  code.focus();
+  code.setSelectionRange(pos,pos+(lines[line-1]||'').length);
+  code.scrollTop=Math.max(0,(line-3)*22.75);
+  code.scrollIntoView({block:'center',behavior:'smooth'});
+}
+
+/* ---------- الحالة والإحصائيات ---------- */
+var state='stopped', desired=false, rt=null, lastCfg=null, lastAlive=0, errAt=0, authFail=false, upStart=0, botName='';
+var persistStats=debounce(function(){ LS.set('bh_stats',S.stats); },1000);
+var persistOffset=debounce(function(){ LS.set('bh_offset',S.offset); },500);
+var bucket=0, series=[]; for(var q=0;q<60;q++) series.push(0);
+
+function renderStats(){
+  $('stIn').textContent=S.stats.in; $('stOut').textContent=S.stats.out;
+  $('stCmds').textContent=S.stats.cmds+' أمر منفّذ';
+}
+function setStatus(st,extra){
+  state=st;
+  pill.className='pill '+(st==='on'?'on':st==='starting'?'starting':st==='err'?'err':'');
+  var txt={on:'شغّال'+(S.sim?' (وضع التجربة)':''),starting:'جارِ التشغيل…',err:'خطأ — راجع السجل',stopped:'متوقف'}[st];
+  pillTxt.textContent=txt;
+  $('stState').textContent={on:'شغّال',starting:'يبدأ…',err:'خطأ',stopped:'متوقف'}[st];
+  var active=(st==='on'||st==='starting');
+  runBtn.classList.toggle('stop',active);
+  runBtn.textContent=active&&!S.sim?'■ إيقاف البوت':'▶ تشغيل البوت';
+  simBtn.textContent=active&&S.sim?'■ إيقاف التجربة':'🧪 جرّب بدون توكن';
+  restartBtn.classList.toggle('hidden',!active);
+  $('liveBadge').classList.toggle('hidden',st!=='on');
+  $('simRow').classList.toggle('hidden',!(S.sim&&active));
+  if(st==='on'&&extra){ botName=extra; botChip.textContent=extra; botChip.classList.remove('hidden'); }
+  if(!active){ botChip.classList.add('hidden'); }
+  document.title=(st==='on'?'🟢 ':'')+'بوت هوست — استضافة بوتات تيليجرام مجاناً';
+}
+setInterval(function(){
+  if(state==='on'&&upStart){
+    var s=Math.floor((Date.now()-upStart)/1000);
+    var p=function(n){ return String(n).padStart(2,'0'); };
+    $('stUp').textContent=p(Math.floor(s/3600))+':'+p(Math.floor(s%3600/60))+':'+p(s%60);
+  }
+  series.push(bucket); series.shift(); bucket=0; drawSpark();
+  $('clock').textContent=new Date().toTimeString().slice(0,8);
+},1000);
+function drawSpark(){
+  var cv=$('spark'); if(!cv) return;
+  var r=cv.getBoundingClientRect(), dpr=window.devicePixelRatio||1;
+  var w=Math.max(120,r.width), h=Math.max(52,r.height||52);
+  if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){ cv.width=Math.round(w*dpr); cv.height=Math.round(h*dpr); }
+  var c=cv.getContext('2d'); c.setTransform(dpr,0,0,dpr,0,0); c.clearRect(0,0,w,h);
+  var max=Math.max(3,Math.max.apply(null,series)), step=w/(series.length-1);
+  c.beginPath();
+  series.forEach(function(v,i){ var x=i*step, y=h-4-(v/max)*(h-12); i?c.lineTo(x,y):c.moveTo(x,y); });
+  c.strokeStyle='#38b0ee'; c.lineWidth=2; c.lineJoin='round'; c.stroke();
+  c.lineTo(w,h); c.lineTo(0,h); c.closePath();
+  var g=c.createLinearGradient(0,0,0,h); g.addColorStop(0,'rgba(56,176,238,.28)'); g.addColorStop(1,'rgba(56,176,238,0)');
+  c.fillStyle=g; c.fill();
+}
+function addFeed(from,text){
+  var feed=$('feed'), empty=feed.querySelector('.feed-empty'); if(empty) empty.remove();
+  var d=document.createElement('div'); d.className='fitem';
+  var b=document.createElement('b'); b.textContent=from;
+  var tm=document.createElement('span'); tm.className='ftime'; tm.textContent=' '+new Date().toTimeString().slice(0,8);
+  var m=document.createElement('div'); m.textContent=text;
+  d.appendChild(b); d.appendChild(tm); d.appendChild(m);
+  feed.insertBefore(d,feed.firstChild);
+  while(feed.children.length>30) feed.removeChild(feed.lastChild);
+}
+
+/* ---------- تشغيل البوت (Worker) ---------- */
+function mainRuntime(){
+  var fake={onmessage:null,postMessage:function(m){ setTimeout(function(){ if(r===rt) onRt(m); },0); }};
+  var r={kind:'main',gotMsg:true,
+    post:function(m){ if(fake.onmessage) fake.onmessage({data:m}); },
+    kill:function(){ if(fake.onmessage) fake.onmessage({data:{type:'stop'}}); }};
+  botRuntime(fake);
+  return r;
+}
+function makeRuntime(){
+  var r={kind:'worker',gotMsg:false};
+  try{
+    var blob=new Blob(['('+botRuntime.toString()+')(self)'],{type:'text/javascript'});
+    var w=new Worker(URL.createObjectURL(blob));
+    r.post=function(m){ w.postMessage(m); };
+    r.kill=function(){ try{ w.terminate(); }catch(e){} };
+    w.onmessage=function(e){ r.gotMsg=true; if(r===rt) onRt(e.data); };
+    w.onerror=function(ev){
+      if(ev.preventDefault) ev.preventDefault();
+      if(r!==rt) return;
+      if(!r.gotMsg){
+        log('sys','تعذر تشغيل Worker في هذا المتصفح — شغّلت البوت داخل الصفحة مباشرة (قد يتوقف أسرع بالخلفية)');
+        var old=rt; rt=mainRuntime(); old.kill(); rt.post(lastCfg);
+      } else log('err','خطأ داخلي في الـ Worker: '+(ev.message||''));
+    };
+    return r;
+  }catch(e){ return mainRuntime(); }
+}
+
+function onRt(m){
+  switch(m.type){
+    case 'log':
+      if(/\(401\)/.test(m.text)) authFail=true;
+      log(m.level,m.text); break;
+    case 'status':
+      if(m.state==='starting') setStatus('starting');
+      else if(m.state==='on'){ upStart=Date.now(); lastAlive=Date.now(); setStatus('on',m.bot); toast('البوت '+m.bot+' شغّال ✔'); }
+      else if(m.state==='err'){ errAt=Date.now(); setStatus('err'); if(authFail){ desired=false; LS.set('bh_running',false); keepAliveOff(); toast('التوكن غير صحيح','err'); } }
+      else if(m.state==='stopped') setStatus('stopped');
+      break;
+    case 'in': S.stats.in++; bucket++; bump($('stIn')); renderStats(); persistStats(); addFeed(m.from,m.text); log('msg',m.from+': '+m.text); break;
+    case 'out': S.stats.out++; bucket++; bump($('stOut')); renderStats(); persistStats(); log('out',m.text,m.buttons); break;
+    case 'cmd': S.stats.cmds++; renderStats(); persistStats(); break;
+    case 'ping': $('stPing').textContent=m.ms+'ms'; break;
+    case 'offset': S.offset=m.value; persistOffset(); break;
+    case 'store': S.store=m.data; LS.set('bh_store',m.data); break;
+    case 'alive': lastAlive=Date.now(); break;
+  }
+}
+
+function launch(sim){
+  if(rt){ var old=rt; rt=null; try{ old.post({type:'stop'}); }catch(e){} setTimeout(function(){ old.kill(); },200); }
+  S.sim=sim; authFail=false;
+  lastCfg={type:'start',token:$('token').value.trim(),code:code.value,offset:sim?0:S.offset,sim:sim,store:S.store,files:S.files,libs:S.libs};
+  rt=makeRuntime(); rt.post(lastCfg);
+  lastAlive=Date.now(); errAt=Date.now(); desired=true;
+  setStatus('starting');
+  if(!sim){ if(bc) bc.postMessage({t:'run',id:tabId}); keepAliveOn(); }
+}
+
+function startBot(opts){
+  opts=opts||{};
+  var sim=!!opts.sim;
+  var tok=$('token').value.trim();
+  if(!sim && !/^\d{6,12}:[A-Za-z0-9_-]{30,}$/.test(tok)){
+    var inp=$('token'); inp.classList.remove('shake'); void inp.offsetWidth; inp.classList.add('shake'); inp.focus();
+    toast(tok?'شكل التوكن غلط — لازم يكون مثل 123456:ABC-DEF…':'الصق توكن البوت أولاً (من @BotFather)','err');
+    return;
+  }
+  var errs=checkCode(code.value,Object.keys(S.files)).filter(function(r){ return r.level==='err'; });
+  if(errs.length){
+    errs.forEach(function(r){ log('err',(r.line?'سطر '+r.line+': ':'')+r.msg); });
+    toast('في أخطاء بالكود، ما أقدر أشغّله — شوف نتيجة الفحص','err');
+    runChecker(true); return;
+  }
+  if(!opts.resume){ S.stats={in:0,out:0,cmds:0}; renderStats(); $('stPing').textContent='—'; }
+  if(S.opts.remember){ LS.set('bh_code',code.value); if(!sim) LS.set('bh_token',tok); }
+  if(!sim){ LS.set('bh_running',true); }
+  log('sys',sim?'▶ تشغيل وضع التجربة (بدون اتصال بتيليجرام)':(opts.resume?'↻ استئناف تلقائي للبوت…':'▶ تشغيل البوت…'));
+  launch(sim);
+}
+
+function stopBot(manual){
+  desired=false;
+  if(rt){ var old=rt; rt=null; try{ old.post({type:'stop'}); }catch(e){} setTimeout(function(){ old.kill(); },200); }
+  if(manual){ LS.set('bh_running',false); }
+  keepAliveOff();
+  setStatus('stopped');
+  if(manual) log('sys','■ تم إيقاف البوت');
+}
+
+function restartBot(auto){
+  var sim=S.sim;
+  log('sys',auto?'↻ إعادة تشغيل تلقائية…':'↻ إعادة تشغيل…');
+  launch(sim);
+}
+
+runBtn.addEventListener('click',function(){
+  if((state==='on'||state==='starting')&&!S.sim) stopBot(true);
+  else if(S.sim&&(state==='on'||state==='starting')){ stopBot(true); startBot(); }
+  else startBot();
+});
+simBtn.addEventListener('click',function(){
+  if((state==='on'||state==='starting')&&S.sim){ stopBot(true); return; }
+  if((state==='on'||state==='starting')&&!S.sim){ toast('أوقف البوت الحقيقي أولاً','err'); return; }
+  startBot({sim:true});
+});
+restartBtn.addEventListener('click',function(){ restartBot(false); });
+document.addEventListener('keydown',function(e){
+  if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){ e.preventDefault(); runBtn.click(); }
+});
+$('eye').addEventListener('click',function(){ var t=$('token'); t.type=t.type==='password'?'text':'password'; });
+$('token').addEventListener('input',function(){ if(S.opts.remember) LS.set('bh_token',this.value.trim()); });
+
+/* وضع التجربة: كتابة رسائل */
+function simSend(){
+  var v=$('simIn').value.trim(); if(!v||!rt||!S.sim) return;
+  $('simIn').value=''; rt.post({type:'simMsg',text:v});
+}
+$('simSend').addEventListener('click',simSend);
+$('simIn').addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); simSend(); } });
+
+/* ---------- المراقب: يعيد التشغيل لو وقف ---------- */
+setInterval(function(){
+  if(!desired||authFail||!rt) return;
+  var now=Date.now();
+  if(state==='on' && now-lastAlive>45000){ log('sys','ما وصلني نبض من البوت منذ فترة'); restartBot(true); }
+  else if(state==='err' && !S.sim && now-errAt>15000){ errAt=now; restartBot(true); }
+  else if(state==='starting' && now-lastAlive>60000){ restartBot(true); }
+},8000);
+window.addEventListener('online',function(){ if(desired&&state==='err'&&!authFail){ log('sys','رجع الإنترنت'); restartBot(true); } });
+window.addEventListener('offline',function(){ if(desired) log('err','انقطع الإنترنت — البوت يكمل تلقائياً أول ما يرجع'); });
+
+/* منع تشغيل البوت في تبويبين (يسبب خطأ 409) */
+var tabId=Math.random().toString(36).slice(2);
+var bc=null; try{ bc=new BroadcastChannel('bothost'); }catch(e){}
+if(bc) bc.onmessage=function(e){
+  if(e.data&&e.data.t==='run'&&e.data.id!==tabId&&desired&&!S.sim){
+    log('sys','البوت انتقل لتبويب آخر — أوقفته هنا'); stopBot(false);
+  }
+};
+
+/* ---------- إبقاء الصفحة حيّة بالخلفية ---------- */
+var wl=null, audioEl=null;
+function silentWav(){
+  var n=8000, buf=new ArrayBuffer(44+n), v=new DataView(buf);
+  var w=function(o,s){ for(var i=0;i<s.length;i++) v.setUint8(o+i,s.charCodeAt(i)); };
+  w(0,'RIFF'); v.setUint32(4,36+n,true); w(8,'WAVEfmt '); v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,1,true);
+  v.setUint32(24,8000,true); v.setUint32(28,8000,true); v.setUint16(32,1,true); v.setUint16(34,8,true); w(36,'data'); v.setUint32(40,n,true);
+  for(var i=0;i<n;i++) v.setUint8(44+i,128);
+  return URL.createObjectURL(new Blob([buf],{type:'audio/wav'}));
+}
+async function keepAliveOn(){
+  if(!S.opts.keep) return;
+  try{
+    if(navigator.wakeLock && document.visibilityState==='visible' && !wl){
+      wl=await navigator.wakeLock.request('screen');
+      wl.addEventListener('release',function(){ wl=null; });
+    }
+  }catch(e){}
+  try{
+    if(!audioEl){ audioEl=new Audio(silentWav()); audioEl.loop=true; }
+    await audioEl.play();
+    if('mediaSession' in navigator){
+      navigator.mediaSession.metadata=new MediaMetadata({title:'بوت هوست — البوت شغّال',artist:botName||'Telegram Bot'});
+      navigator.mediaSession.playbackState='playing';
+      try{ navigator.mediaSession.setActionHandler('pause',function(){ audioEl&&audioEl.play(); }); }catch(e){}
+    }
+  }catch(e){ /* المتصفح يطلب لمسة أولى قبل تشغيل الصوت */ }
+}
+function keepAliveOff(){
+  try{ if(wl) wl.release(); }catch(e){} wl=null;
+  try{ if(audioEl) audioEl.pause(); }catch(e){}
+  try{ if('mediaSession' in navigator) navigator.mediaSession.playbackState='none'; }catch(e){}
+}
+document.addEventListener('pointerdown',function(){
+  if(desired&&S.opts.keep&&!S.sim&&audioEl&&audioEl.paused) keepAliveOn();
+},{passive:true});
+document.addEventListener('visibilitychange',function(){
+  if(document.visibilityState==='visible'&&desired){
+    if(!S.sim) keepAliveOn();
+    if(!rt){ launch(S.sim); }
+  }
+});
+
+/* خيارات */
+function bindOpt(id,key){
+  var el=$(id); el.checked=!!S.opts[key];
+  el.addEventListener('change',function(){
+    S.opts[key]=el.checked; LS.set('bh_opts',S.opts);
+    if(key==='remember'){
+      if(!el.checked){ LS.del('bh_token'); LS.del('bh_code'); toast('مسحت الكود والتوكن من هذا الجهاز','info'); }
+      else { LS.set('bh_code',code.value); LS.set('bh_token',$('token').value.trim()); }
+    }
+    if(key==='keep'){ if(el.checked&&desired&&!S.sim) keepAliveOn(); else if(!el.checked) keepAliveOff(); }
+  });
+}
+bindOpt('optRemember','remember'); bindOpt('optKeep','keep'); bindOpt('optAuto','auto');
+
+/* ---------- الفحص ---------- */
+function runChecker(scroll){
+  var res=checkCode(code.value,Object.keys(S.files)), out=$('chkOut');
+  out.innerHTML='';
+  var errs=res.filter(function(r){ return r.level==='err'; }).length;
+  var warns=res.filter(function(r){ return r.level==='warn'; }).length;
+  if(!res.length){
+    var ok=document.createElement('div'); ok.className='chkrow ok'; ok.textContent='✅ الكود سليم — ما لقيت أي مشكلة. تقدر تشغّله.';
+    out.appendChild(ok);
+  }
+  res.forEach(function(r){
+    var d=document.createElement('div'); d.className='chkrow '+r.level;
+    var ic=document.createElement('span'); ic.textContent=r.level==='err'?'❌':r.level==='warn'?'⚠️':'ℹ️';
+    var tx=document.createElement('span'); tx.className='chk-tx'; tx.textContent=r.msg;
+    d.appendChild(ic); d.appendChild(tx);
+    if(r.line){
+      var b=document.createElement('button'); b.className='mini'; b.textContent='سطر '+r.line;
+      b.onclick=function(){ gotoLine(r.line); };
+      d.appendChild(b);
+    }
+    out.appendChild(d);
+  });
+  toast(errs?('❌ '+errs+' خطأ'+(warns?' و'+warns+' تنبيه':'')):warns?('⚠️ '+warns+' تنبيه'):'✅ الكود سليم',errs?'err':'info');
+  if(scroll) out.scrollIntoView({behavior:'smooth',block:'center'});
+}
+$('chkBtn').addEventListener('click',function(){ runChecker(true); });
+
+/* ---------- فتح وحفظ وتصدير ---------- */
+function readFile(f){
+  if(f.text) return f.text();
+  return new Promise(function(res,rej){ var r=new FileReader(); r.onload=function(){ res(r.result); }; r.onerror=rej; r.readAsText(f); });
+}
+function download(name,text){
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([text],{type:'text/plain;charset=utf-8'}));
+  a.download=name; document.body.appendChild(a); a.click(); a.remove();
+}
+$('openBtn').addEventListener('click',function(){ $('openFile').click(); });
+$('openFile').addEventListener('change',async function(){
+  var f=this.files[0]; this.value=''; if(!f) return;
+  if(f.size>1500000){ toast('الملف كبير (أكثر من 1.5 ميجا)','err'); return; }
+  if(code.value.trim() && !confirm('الكود الحالي بينمسح ويتبدل بمحتوى الملف. تكمل؟')) return;
+  code.value=await readFile(f); setActiveChip(-1); updateEditor(); saveCode();
+  toast('تم فتح '+f.name+' في المحرر'); runChecker(false);
+});
+$('dlBtn').addEventListener('click',function(){ download('bot.js',code.value); });
+
+function buildServerScript(){
+  return [
+    '// bot-server.js — مولَّد من بوت هوست',
+    '// التشغيل على أي سيرفر فيه Node 18 أو أحدث:',
+    '//   BOT_TOKEN=توكنك node bot-server.js',
+    "'use strict';",
+    "const fs=require('fs'), http=require('http');",
+    'const TOKEN=process.env.BOT_TOKEN;',
+    "if(!TOKEN){ console.error('حط التوكن في متغير البيئة BOT_TOKEN'); process.exit(1); }",
+    'const BOT_CODE='+JSON.stringify(code.value)+';',
+    'const FILES='+JSON.stringify(S.files)+';',
+    "const STORE_FILE='store.json', OFFSET_FILE='offset.txt';",
+    "let store={}; try{ store=JSON.parse(fs.readFileSync(STORE_FILE,'utf8')); }catch(e){}",
+    "let offset=0; try{ offset=parseInt(fs.readFileSync(OFFSET_FILE,'utf8'),10)||0; }catch(e){}",
+    '',
+    botRuntime.toString(),
+    '',
+    'const self={',
+    '  onmessage:null,',
+    "  persistStore(d){ try{ fs.writeFileSync(STORE_FILE,JSON.stringify(d)); }catch(e){} },",
+    '  postMessage(m){',
+    "    if(m.type==='log'||m.type==='in'||m.type==='out') console.log('['+m.type+']',m.text);",
+    "    else if(m.type==='offset'){ try{ fs.writeFileSync(OFFSET_FILE,String(m.value)); }catch(e){} }",
+    "    else if(m.type==='status'&&m.state==='on') console.log('✔ البوت شغّال',m.bot);",
+    "    else if(m.type==='status'&&m.state==='err') process.exit(1);",
+    '  }',
+    '};',
+    'botRuntime(self);',
+    "self.onmessage({data:{type:'start',token:TOKEN,code:BOT_CODE,offset:offset,store:store,files:FILES,libs:[]}});",
+    "// منفذ بسيط عشان خدمات الاستضافة (Render وغيرها) تعتبر الخدمة شغّالة",
+    "http.createServer((q,r)=>r.end('bot is running')).listen(process.env.PORT||3000);",
+    ''
+  ].join('\n');
+}
+$('expBtn').addEventListener('click',function(){
+  var errs=checkCode(code.value,Object.keys(S.files)).filter(function(r){ return r.level==='err'; });
+  if(errs.length){ toast('صلّح أخطاء الكود أولاً (اضغط فحص)','err'); runChecker(true); return; }
+  download('bot-server.js',buildServerScript());
+  log('info','نزل الملف bot-server.js — للتشغيل 24/7: ارفعه على Render أو Koyeb أو Railway، وضع التوكن في متغير BOT_TOKEN، وأمر التشغيل: node bot-server.js');
+  toast('نزل bot-server.js ✔');
+});
+
+/* ---------- الملفات والمكتبات ---------- */
+function saveFiles(){ if(!LS.set('bh_files',S.files)) toast('مساحة التخزين ممتلئة — الملفات بتبقى حتى تقفل الصفحة فقط','err'); }
+function rowItem(name,sub,actions){
+  var d=document.createElement('div'); d.className='rowitem';
+  var l=document.createElement('div'); var n=document.createElement('span'); n.className='nm'; n.textContent=name; l.appendChild(n);
+  if(sub){ var s=document.createElement('span'); s.className='hint'; s.textContent='  '+sub; l.appendChild(s); }
+  var a=document.createElement('div'); a.style.display='flex'; a.style.gap='6px';
+  actions.forEach(function(x){ var b=document.createElement('button'); b.className='mini'; b.textContent=x[0]; b.onclick=x[1]; a.appendChild(b); });
+  d.appendChild(l); d.appendChild(a); return d;
+}
+function renderFiles(){
+  var fl=$('fileList'); fl.innerHTML='';
+  var names=Object.keys(S.files);
+  if(!names.length){ var e=document.createElement('div'); e.className='hint'; e.style.padding='4px 2px 8px'; e.textContent='ما في ملفات مرفوعة بعد'; fl.appendChild(e); }
+  names.forEach(function(n){
+    fl.appendChild(rowItem(n,(S.files[n].length/1024).toFixed(1)+' KB',[
+      ['فتح بالمحرر',function(){
+        if(code.value.trim() && !confirm('الكود الحالي بينمسح. تكمل؟')) return;
+        code.value=S.files[n]; setActiveChip(-1); updateEditor(); saveCode(); toast('تم فتح '+n+' في المحرر');
+      }],
+      ['حذف',function(){ delete S.files[n]; saveFiles(); renderFiles(); }]
+    ]));
+  });
+  var ll=$('libList'); ll.innerHTML='';
+  S.libs.forEach(function(u,i){
+    ll.appendChild(rowItem(u,'',[['حذف',function(){ S.libs.splice(i,1); LS.set('bh_libs',S.libs); renderFiles(); }]]));
+  });
+}
+$('fileIn').addEventListener('change',async function(){
+  var list=Array.prototype.slice.call(this.files); this.value='';
+  for(var i=0;i<list.length;i++){
+    var f=list[i];
+    if(f.size>1500000){ toast(f.name+' كبير (أكثر من 1.5 ميجا)','err'); continue; }
+    try{
+      S.files[f.name]=await readFile(f);
+      toast('تم رفع '+f.name+(/\.(js|cjs|mjs)$/i.test(f.name)?' — استدعيه بـ require("'+f.name+'")':''),'info');
+    }catch(e){ toast('تعذر قراءة '+f.name,'err'); }
+  }
+  saveFiles(); renderFiles();
+});
+$('libAdd').addEventListener('click',function(){
+  var u=$('libUrl').value.trim();
+  if(!/^https:\/\/\S+\.js(\?\S*)?$/i.test(u)){ toast('الرابط لازم يبدأ بـ https وينتهي بـ .js','err'); return; }
+  if(S.libs.indexOf(u)<0) S.libs.push(u);
+  LS.set('bh_libs',S.libs); $('libUrl').value=''; renderFiles();
+  toast('انضافت المكتبة — تتحمّل مع كل تشغيل','info');
+});
+
+/* ---------- باني الأوامر ---------- */
+function tplEsc(s){ return s.replace(/\\/g,'\\\\').replace(/`/g,'\\`').replace(/\$\{/g,'\\${'); }
+function fillVars(s){ return tplEsc(s).replace(/\{name\}/g,'${ctx.from.first_name}').replace(/\{args\}/g,'${ctx.argsText}'); }
+function jsStr(s){ return JSON.stringify(s); }
+function syncBuilder(){
+  var t=$('bType').value;
+  $('bPhotoRow').classList.toggle('hidden',t!=='photo');
+  $('bBtnsRow').classList.toggle('hidden',t!=='buttons');
+}
+$('bType').addEventListener('change',syncBuilder); syncBuilder();
+$('bAdd').addEventListener('click',function(){
+  var name=$('bName').value.trim().replace(/^\//,'').toLowerCase();
+  if(!/^[a-z0-9_]{1,32}$/.test(name)){ toast('اسم الأمر: حروف إنجليزية صغيرة وأرقام و _ فقط (مثال: hello)','err'); $('bName').focus(); return; }
+  if(new RegExp("onCommand\\(\\s*['\"]"+name+"['\"]").test(code.value)){ toast('الأمر /'+name+' موجود في الكود من قبل','err'); return; }
+  var type=$('bType').value, text=$('bText').value.trim(), desc=$('bDesc').value.trim();
+  if(!text && type!=='photo'){ toast('اكتب نص الرد','err'); $('bText').focus(); return; }
+  var body='', extra='';
+  if(type==='text'){
+    body='  await ctx.reply(`'+fillVars(text)+'`);';
+  } else if(type==='photo'){
+    var url=$('bPhoto').value.trim();
+    if(!/^https?:\/\//i.test(url)){ toast('حط رابط الصورة (يبدأ بـ https)','err'); $('bPhoto').focus(); return; }
+    body='  await ctx.photo('+jsStr(url)+(text?', `'+fillVars(text)+'`':'')+');';
+  } else {
+    var rows=[], cbs=[];
+    $('bBtns').value.split('\n').map(function(l){ return l.trim(); }).filter(Boolean).forEach(function(l){
+      var p=l.split('|'), label=p[0].trim(), val=(p[1]||'').trim();
+      if(!label) return;
+      if(/^https?:\/\//i.test(val)) rows.push('[{ text: '+jsStr(label)+', url: '+jsStr(val)+' }]');
+      else { var d=val||label; rows.push('[{ text: '+jsStr(label)+', data: '+jsStr(d)+' }]'); cbs.push([d,label]); }
+    });
+    if(!rows.length){ toast('اكتب زر واحد على الأقل (كل زر في سطر)','err'); $('bBtns').focus(); return; }
+    body='  await ctx.reply(`'+fillVars(text)+'`, {\n    buttons: [\n      '+rows.join(',\n      ')+'\n    ]\n  });';
+    cbs.forEach(function(c){
+      extra+='\nbot.onCallback('+jsStr(c[0])+', async (ctx) => {\n  await ctx.answer('+jsStr('اخترت: '+c[1])+');\n  await ctx.edit('+jsStr('✅ اخترت: '+c[1])+');\n});\n';
+    });
+  }
+  var snippet='\n// ➕ أمر /'+name+'\nbot.onCommand('+jsStr(name)+', async (ctx) => {\n'+body+'\n});\n'+
+    (desc?'bot.describe('+jsStr(name)+', '+jsStr(desc)+');\n':'')+extra;
+  code.value=code.value.replace(/\s*$/,'\n')+snippet;
+  setActiveChip(-1); updateEditor(); saveCode();
+  code.scrollTop=code.scrollHeight;
+  toast('انضاف الأمر /'+name+' للكود ✔');
+  $('bName').value=''; $('bDesc').value=''; $('bText').value=''; $('bBtns').value=''; $('bPhoto').value='';
+});
+
+/* ---------- متفرقات ---------- */
+$('copyBtn').addEventListener('click',function(){
+  var txt=rawLogs.join('\n');
+  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(function(){ toast('تم نسخ السجل'); },function(){ toast('تعذر النسخ','err'); }); }
+  else { var ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); toast('تم نسخ السجل'); }catch(e){} ta.remove(); }
+});
+$('clearTerm').addEventListener('click',function(){ logs.innerHTML=''; rawLogs=[]; savedLogs=[]; LS.del('bh_logs'); });
+
+function checkApi(){
+  var chip=$('apiChip'), done=false;
+  var t=setTimeout(function(){ if(!done){ done=true; chip.className='bad'; chip.innerHTML='<span class="dot"></span> تيليجرام ما يرد — تأكد من الإنترنت'; } },6000);
+  fetch('https://api.telegram.org/',{mode:'no-cors',cache:'no-store'}).then(function(){
+    if(done) return; done=true; clearTimeout(t); chip.className='ok'; chip.innerHTML='<span class="dot"></span> تيليجرام متصل';
+  }).catch(function(){
+    if(done) return; done=true; clearTimeout(t); chip.className='bad'; chip.innerHTML='<span class="dot"></span> تيليجرام محجوب أو لا يوجد إنترنت';
+  });
+}
+checkApi(); setInterval(checkApi,60000);
+
+if('IntersectionObserver' in window){
+  var io=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } }); },{threshold:.08});
+  document.querySelectorAll('.reveal').forEach(function(el){ io.observe(el); });
+} else document.querySelectorAll('.reveal').forEach(function(el){ el.classList.add('in'); });
+
+/* ---------- الإقلاع ---------- */
+code.value=(S.code!==null&&S.code!=='')?S.code:T[1];
+if(S.code===null||S.code===T[S.tpl]) setActiveChip(S.tpl); else setActiveChip(-1);
+$('token').value=S.opts.remember?(S.token||''):'';
+updateEditor(); renderStats(); renderFiles(); setStatus('stopped'); drawSpark();
+if(savedLogs.length){
+  savedLogs.slice(-60).forEach(function(l){ addLogLine(l.type,l.text,l.t); });
+  addLogLine('sys','──── تم تحميل الصفحة من جديد ────',new Date().toTimeString().slice(0,8));
+} else log('sys','جاهز. الصق التوكن واضغط «تشغيل»، أو جرّب وضع التجربة بدون توكن.');
+
+if(S.running && S.opts.auto && /^\d{6,12}:[A-Za-z0-9_-]{30,}$/.test($('token').value.trim())){
+  setTimeout(function(){ startBot({resume:true}); },400);
+} else if(S.running && !S.opts.auto){
+  log('sys','البوت كان شغّال قبل ما تقفل الصفحة — اضغط «تشغيل» أو فعّل التشغيل التلقائي');
+}
+
+</script>
+</body>
+</html>
